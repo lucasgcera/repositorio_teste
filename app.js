@@ -1,3 +1,4 @@
+/* imports necessarios para a aplicacao */
 import express from 'express';
 import mongoose from 'mongoose';
 import { accountRouter } from './routes/accountRouter.js';
@@ -21,6 +22,6 @@ import { accountRouter } from './routes/accountRouter.js';
 const app = express();
 
 app.use(express.json());
-app.use(accountRouter);
+app.use(accountRouter); //adicionando arquivos com as rotas para a API
 
-app.listen(3000, () => console.log('API Iniciada'));
+app.listen(3000, () => console.log('API Iniciada')); //iniciando API na porta 3000
