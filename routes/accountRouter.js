@@ -244,4 +244,54 @@ app.get('/transferirricos', async (req, res) => {
     }
 });
 
+//TRANSFERENCIA
+app.put(
+    '/transferencia/:contaorigem/:contadestino/:valor',
+    async (req, res) => {
+        try {
+            const { contaorigem, contadestino, valor } = req.params;
+
+            const contaOrigem = await accountModel.findOne({
+                conta: contaorigem,
+            });
+            const contaDestino = await accountModel.findOne({
+                conta: contadestino,
+            });
+
+            if (!contaOrigem || !contaDestino) {
+                res.status(404).send(
+                    'Conta Origem ou Destino não encontrada na coleção'
+                );
+            } else {
+                let saldoAtualOrigem = contaOrigem.balance - parseFloat(valor);
+                let saldoAtualDestino =
+                    contaDestino.balance + parseFloat(valor);
+
+                if (contaOrigem.agencia !== contaDestino.agencia) {
+                    saldoAtualOrigem -= 8;
+                }
+
+                if (saldoAtualOrigem < 0) {
+                    res.status(500).send('Saldo da conta é insuficiente!');
+                } else {
+                    await accountModel.updateOne(
+                        { _id: contaOrigem._id },
+                        { balance: saldoAtualOrigem }
+                    );
+                    await accountModel.updateOne(
+                        { _id: contaDestino._id },
+                        { balance: saldoAtualDestino }
+                    );
+
+                    res.status(200).send(
+                        `O saldo atual da conta origem é: ${saldoAtualOrigem}`
+                    );
+                }
+            }
+        } catch (error) {
+            res.status(500).send(error);
+        }
+    }
+);
+
 export { app as accountRouter };
